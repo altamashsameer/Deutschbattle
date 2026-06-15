@@ -2,6 +2,7 @@
 
 A competitive German language learning game. Battle opponents in real-time quiz matches, deal damage with fast correct answers, and climb through CEFR levels from A1.1 to B1.2.
 
+https://altamashsameer.github.io/Deutschbattle/
 ---
 
 ## How to Play
