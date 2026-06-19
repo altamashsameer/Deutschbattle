@@ -1,0 +1,785 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DeutschBattle — Revision</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="revision-data.js"></script>
+<style>
+  :root {
+    --bg: #0f0f1a;
+    --surface: #1a1a2e;
+    --surface2: #222240;
+    --blue: #4f8ef7;
+    --purple: #a855f7;
+    --green: #22c97a;
+    --red: #f75454;
+    --amber: #f7a825;
+    --text: #e8e8f0;
+    --muted: #8888aa;
+    --border: #2a2a4a;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+  body { min-height: 100vh; }
+
+  /* ── SCREENS ── */
+  .screen { display: none; min-height: 100vh; padding: 20px; }
+  .screen.active { display: flex; flex-direction: column; align-items: center; }
+
+  /* ── HEADER ── */
+  .top-bar {
+    width: 100%; max-width: 700px;
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 28px; padding-top: 4px;
+  }
+  .back-btn {
+    background: var(--surface); border: 1px solid var(--border);
+    color: var(--muted); border-radius: var(--radius-sm);
+    padding: 8px 14px; font-size: 14px; cursor: pointer;
+    transition: all 0.2s;
+  }
+  .back-btn:hover { color: var(--text); border-color: var(--blue); }
+  .top-title { font-size: 15px; font-weight: 600; color: var(--muted); }
+
+  /* ── REVISION HOME ── */
+  .revision-hero { text-align: center; margin-bottom: 32px; }
+  .revision-hero h1 { font-size: 32px; font-weight: 800; margin-bottom: 8px; }
+  .revision-hero p { color: var(--muted); font-size: 15px; }
+  .revision-hero .emoji-big { font-size: 48px; margin-bottom: 12px; display: block; }
+
+  .chapters-grid {
+    width: 100%; max-width: 700px;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 14px; margin-bottom: 24px;
+  }
+  @media (max-width: 500px) { .chapters-grid { grid-template-columns: 1fr; } }
+
+  .chapter-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 18px 16px;
+    cursor: pointer; transition: all 0.2s; text-align: left;
+  }
+  .chapter-card:hover { border-color: var(--blue); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(79,142,247,0.12); }
+  .chapter-card .ch-emoji { font-size: 26px; margin-bottom: 8px; display: block; }
+  .chapter-card .ch-num { font-size: 11px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .chapter-card .ch-title { font-size: 14px; font-weight: 700; margin-top: 4px; }
+
+  .all-btn-wrap { width: 100%; max-width: 700px; display: flex; gap: 12px; margin-bottom: 16px; }
+  .all-btn {
+    flex: 1; padding: 14px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 700; cursor: pointer;
+    border: 1.5px solid; transition: all 0.2s; text-align: center;
+  }
+  .all-btn.test { background: rgba(168,85,247,0.1); border-color: var(--purple); color: var(--purple); }
+  .all-btn.practice { background: rgba(34,201,122,0.1); border-color: var(--green); color: var(--green); }
+  .all-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  .home-link {
+    margin-top: 8px; color: var(--muted); font-size: 13px;
+    background: none; border: none; cursor: pointer; text-decoration: underline;
+  }
+  .home-link:hover { color: var(--text); }
+
+  /* ── CHAPTER DETAIL ── */
+  .chapter-hero {
+    width: 100%; max-width: 700px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px;
+    margin-bottom: 20px; text-align: center;
+  }
+  .chapter-hero .ch-emoji-lg { font-size: 40px; margin-bottom: 8px; }
+  .chapter-hero h2 { font-size: 22px; font-weight: 800; }
+  .chapter-hero p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+
+  .chapter-actions { width: 100%; max-width: 700px; display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+  .action-btn {
+    width: 100%; padding: 16px 20px; border-radius: var(--radius);
+    font-size: 15px; font-weight: 700; cursor: pointer;
+    border: 1.5px solid; transition: all 0.2s; text-align: left;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .action-btn .ab-icon { font-size: 22px; }
+  .action-btn .ab-text { flex: 1; }
+  .action-btn .ab-desc { font-size: 12px; font-weight: 400; opacity: 0.75; display: block; margin-top: 2px; }
+  .action-btn.summary { background: rgba(79,142,247,0.1); border-color: var(--blue); color: var(--blue); }
+  .action-btn.practice { background: rgba(34,201,122,0.1); border-color: var(--green); color: var(--green); }
+  .action-btn.test { background: rgba(168,85,247,0.1); border-color: var(--purple); color: var(--purple); }
+  .action-btn:hover { opacity: 0.85; transform: translateY(-1px); }
+
+  /* ── SUMMARY ── */
+  .summary-wrap { width: 100%; max-width: 700px; }
+  .summary-section {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); margin-bottom: 16px; overflow: hidden;
+  }
+  .summary-section-header {
+    padding: 14px 18px; font-size: 13px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .summary-section-header.can-do { background: rgba(34,201,122,0.1); color: var(--green); border-bottom: 1px solid var(--border); }
+  .summary-section-header.grammar { background: rgba(79,142,247,0.1); color: var(--blue); border-bottom: 1px solid var(--border); }
+  .summary-section-header.vocab { background: rgba(247,168,37,0.1); color: var(--amber); border-bottom: 1px solid var(--border); }
+  .summary-section-body { padding: 16px 18px; }
+
+  .can-do-list { list-style: none; }
+  .can-do-list li { padding: 6px 0; font-size: 14px; color: var(--text); display: flex; gap: 8px; }
+  .can-do-list li::before { content: "✓"; color: var(--green); font-weight: 700; flex-shrink: 0; }
+
+  .grammar-block { margin-bottom: 20px; padding-bottom: 20px; border-bottom: 1px solid var(--border); }
+  .grammar-block:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+  .grammar-block h4 { font-size: 15px; font-weight: 700; margin-bottom: 8px; color: var(--blue); }
+  .grammar-block .explanation { font-size: 13px; color: var(--text); line-height: 1.6; margin-bottom: 10px; }
+  .grammar-block .explanation-de { font-size: 12px; color: var(--muted); line-height: 1.5; margin-bottom: 10px; font-style: italic; }
+
+  .grammar-table { width: 100%; border-collapse: collapse; margin-bottom: 10px; font-size: 13px; }
+  .grammar-table th { background: var(--surface2); color: var(--muted); padding: 7px 10px; text-align: left; font-weight: 600; font-size: 11px; text-transform: uppercase; }
+  .grammar-table td { padding: 7px 10px; border-top: 1px solid var(--border); color: var(--text); }
+  .grammar-table tr:nth-child(even) td { background: rgba(255,255,255,0.02); }
+
+  .examples-list { list-style: none; }
+  .examples-list li { padding: 6px 0 6px 12px; border-left: 2px solid var(--blue); margin-bottom: 6px; font-size: 13px; }
+  .examples-list li .de { color: var(--text); font-weight: 600; }
+  .examples-list li .en { color: var(--muted); margin-top: 2px; }
+
+  .vocab-group { margin-bottom: 14px; }
+  .vocab-group:last-child { margin-bottom: 0; }
+  .vocab-group h5 { font-size: 12px; font-weight: 700; color: var(--amber); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; }
+  .vocab-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+  .vocab-tag {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 20px; padding: 4px 10px; font-size: 12px; color: var(--text);
+  }
+
+  /* ── PRACTICE / TEST ── */
+  .quiz-wrap { width: 100%; max-width: 660px; }
+
+  .quiz-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 20px;
+  }
+  .quiz-label { font-size: 13px; font-weight: 600; color: var(--muted); }
+  .quiz-counter { font-size: 20px; font-weight: 800; }
+  .quiz-mode-badge {
+    font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 20px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .quiz-mode-badge.practice { background: rgba(34,201,122,0.15); color: var(--green); }
+  .quiz-mode-badge.test { background: rgba(168,85,247,0.15); color: var(--purple); }
+
+  .progress-bar-wrap { width: 100%; height: 4px; background: var(--surface2); border-radius: 2px; margin-bottom: 24px; }
+  .progress-bar { height: 4px; border-radius: 2px; background: var(--purple); transition: width 0.3s; }
+  .progress-bar.green { background: var(--green); }
+
+  .question-card {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 24px; margin-bottom: 18px;
+  }
+  .question-type-tag {
+    font-size: 11px; font-weight: 600; color: var(--muted);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;
+  }
+  .question-text { font-size: 17px; font-weight: 700; line-height: 1.5; }
+
+  .options-list { display: flex; flex-direction: column; gap: 10px; }
+  .option-btn {
+    background: var(--surface2); border: 1.5px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px;
+    font-size: 14px; font-weight: 500; color: var(--text);
+    cursor: pointer; text-align: left; transition: all 0.18s; line-height: 1.4;
+  }
+  .option-btn:hover:not(:disabled) { border-color: var(--blue); background: rgba(79,142,247,0.08); }
+  .option-btn.correct { border-color: var(--green); background: rgba(34,201,122,0.15); color: var(--green); }
+  .option-btn.wrong { border-color: var(--red); background: rgba(247,84,84,0.12); color: var(--red); }
+  .option-btn.reveal { border-color: var(--green); background: rgba(34,201,122,0.08); }
+  .option-btn:disabled { cursor: default; }
+
+  .explanation-box {
+    margin-top: 16px; padding: 14px 16px;
+    border-radius: var(--radius-sm); font-size: 13px; line-height: 1.6;
+    border: 1px solid; display: none;
+  }
+  .explanation-box.correct-exp { border-color: var(--green); background: rgba(34,201,122,0.08); color: var(--text); }
+  .explanation-box.wrong-exp { border-color: var(--amber); background: rgba(247,168,37,0.08); color: var(--text); }
+  .explanation-box .exp-en { font-weight: 600; margin-bottom: 4px; }
+  .explanation-box .exp-de { color: var(--muted); font-style: italic; }
+  .explanation-box.visible { display: block; }
+
+  .next-btn {
+    width: 100%; padding: 15px; border-radius: var(--radius);
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    color: #fff; font-size: 15px; font-weight: 700;
+    border: none; cursor: pointer; margin-top: 14px;
+    transition: opacity 0.2s; display: none;
+  }
+  .next-btn:hover { opacity: 0.9; }
+  .next-btn.visible { display: block; }
+
+  /* ── RESULTS ── */
+  .results-wrap { width: 100%; max-width: 660px; text-align: center; }
+  .result-icon { font-size: 64px; margin-bottom: 16px; }
+  .result-title { font-size: 28px; font-weight: 800; margin-bottom: 8px; }
+  .result-score {
+    font-size: 48px; font-weight: 800; margin: 16px 0;
+    background: linear-gradient(135deg, var(--blue), var(--purple));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  }
+  .result-sub { color: var(--muted); font-size: 14px; margin-bottom: 28px; }
+
+  .review-list { text-align: left; margin-bottom: 24px; }
+  .review-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 10px;
+  }
+  .review-item .ri-q { font-size: 13px; font-weight: 600; margin-bottom: 6px; }
+  .review-item .ri-correct { font-size: 12px; color: var(--green); margin-bottom: 2px; }
+  .review-item .ri-your { font-size: 12px; color: var(--red); margin-bottom: 6px; }
+  .review-item .ri-exp { font-size: 12px; color: var(--muted); font-style: italic; }
+  .review-item.all-good { border-color: var(--green); }
+  .review-item.had-wrong { border-color: rgba(247,84,84,0.4); }
+
+  .result-actions { display: flex; gap: 12px; flex-direction: column; }
+  .res-btn {
+    width: 100%; padding: 14px; border-radius: var(--radius);
+    font-size: 14px; font-weight: 700; cursor: pointer; border: 1.5px solid;
+    transition: all 0.2s;
+  }
+  .res-btn.primary { background: linear-gradient(135deg, var(--blue), var(--purple)); color: #fff; border-color: transparent; }
+  .res-btn.secondary { background: transparent; border-color: var(--border); color: var(--muted); }
+  .res-btn:hover { opacity: 0.85; }
+
+  /* ── SPINNER ── */
+  .spinner-wrap { display: flex; align-items: center; justify-content: center; min-height: 60vh; }
+  .spinner { width: 48px; height: 48px; border: 3px solid var(--border); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.8s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* misc */
+  .divider { width: 100%; max-width: 700px; height: 1px; background: var(--border); margin: 8px 0 20px; }
+  .section-label { width: 100%; max-width: 700px; font-size: 12px; font-weight: 700; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; }
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 1 — REVISION HOME
+════════════════════════════════════════════════ -->
+<div id="screen-home" class="screen active">
+  <div style="width:100%;max-width:700px;">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px;padding-top:4px;">
+      <span style="font-size:20px;font-weight:800;letter-spacing:-0.5px;">📚 DeutschBattle</span>
+      <button class="home-link" onclick="goToGame()">← Back to Game</button>
+    </div>
+  </div>
+
+  <div class="revision-hero">
+    <span class="emoji-big">🇩🇪</span>
+    <h1>Revision — A2.1</h1>
+    <p>Linie 1 A2.1 · 8 chapters · 800 questions</p>
+  </div>
+
+  <div class="all-btn-wrap">
+    <button class="all-btn test" onclick="startAllTest()">⚡ Test All (20 Q)</button>
+    <button class="all-btn practice" onclick="startAllPractice()">♾️ Practice All</button>
+  </div>
+
+  <div class="divider"></div>
+  <div class="section-label" style="max-width:700px;width:100%;">Chapters</div>
+  <div class="chapters-grid" id="chapters-grid"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 2 — CHAPTER DETAIL
+════════════════════════════════════════════════ -->
+<div id="screen-chapter" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" onclick="showScreen('home')">← Chapters</button>
+    <span class="top-title" id="chapter-top-title">Chapter</span>
+  </div>
+  <div class="chapter-hero">
+    <div class="ch-emoji-lg" id="chapter-emoji">📖</div>
+    <h2 id="chapter-title">Chapter Title</h2>
+    <p id="chapter-subtitle">100 questions</p>
+  </div>
+  <div class="chapter-actions">
+    <button class="action-btn summary" onclick="startSummary()">
+      <span class="ab-icon">📋</span>
+      <span class="ab-text">Summary<span class="ab-desc">Grammar tables, vocabulary, can-do list</span></span>
+    </button>
+    <button class="action-btn practice" onclick="startPractice()">
+      <span class="ab-icon">♾️</span>
+      <span class="ab-text">Practice<span class="ab-desc">Unlimited questions — explanation after every answer</span></span>
+    </button>
+    <button class="action-btn test" onclick="startTest()">
+      <span class="ab-icon">📝</span>
+      <span class="ab-text">Test<span class="ab-desc">10 random questions — review at the end</span></span>
+    </button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 3 — SUMMARY
+════════════════════════════════════════════════ -->
+<div id="screen-summary" class="screen">
+  <div class="top-bar">
+    <button class="back-btn" id="summary-back-btn" onclick="showScreen('chapter')">← Back</button>
+    <span class="top-title" id="summary-top-title">Summary</span>
+  </div>
+  <div class="summary-wrap" id="summary-content"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 4 — PRACTICE / TEST QUIZ
+════════════════════════════════════════════════ -->
+<div id="screen-quiz" class="screen">
+  <div class="top-bar" style="max-width:660px;">
+    <button class="back-btn" id="quiz-back-btn" onclick="quitQuiz()">✕ Quit</button>
+    <span class="top-title" id="quiz-top-title">Practice</span>
+  </div>
+  <div class="quiz-wrap">
+    <div class="quiz-header">
+      <div>
+        <div class="quiz-label" id="quiz-chapter-label">Chapter 1</div>
+        <div class="quiz-counter" id="quiz-counter">Q 1</div>
+      </div>
+      <div class="quiz-mode-badge" id="quiz-mode-badge">Practice</div>
+    </div>
+    <div class="progress-bar-wrap">
+      <div class="progress-bar" id="quiz-progress-bar"></div>
+    </div>
+    <div class="question-card">
+      <div class="question-type-tag" id="q-type-tag">Vocabulary</div>
+      <div class="question-text" id="q-text">Loading...</div>
+    </div>
+    <div class="options-list" id="options-list"></div>
+    <div class="explanation-box" id="explanation-box">
+      <div class="exp-en" id="exp-en"></div>
+      <div class="exp-de" id="exp-de"></div>
+    </div>
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">Next →</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     SCREEN 5 — RESULTS
+════════════════════════════════════════════════ -->
+<div id="screen-results" class="screen">
+  <div class="top-bar" style="max-width:660px;">
+    <span></span>
+  </div>
+  <div class="results-wrap">
+    <div class="result-icon" id="result-icon">🎉</div>
+    <div class="result-title" id="result-title">Test Complete!</div>
+    <div class="result-score" id="result-score">8/10</div>
+    <div class="result-sub" id="result-sub">Great work! Review the questions below.</div>
+    <div class="review-list" id="review-list"></div>
+    <div class="result-actions">
+      <button class="res-btn primary" onclick="showScreen('home')">← Back to Revision Home</button>
+      <button class="res-btn secondary" id="retry-btn" onclick="retryTest()">Try Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════
+//  STATE
+// ════════════════════════════════════════════════
+let state = {
+  currentChapter: null,   // chapter object
+  mode: null,             // 'practice' | 'test'
+  isAll: false,           // spanning all chapters
+  questions: [],          // question pool for session
+  qIndex: 0,
+  answered: false,
+  score: 0,
+  testLog: [],            // [{q, correctOpt, yourOpt, correct}]
+  practicePool: [],       // shuffled infinite pool
+  practicePoolIndex: 0,
+};
+
+const TYPE_LABELS = {
+  fill: 'Fill in the blank',
+  sentence: 'Choose the correct sentence',
+  vocabulary: 'Vocabulary',
+  article: 'Article',
+  odd_out: 'Odd one out',
+  possessive: 'Possessive',
+  response: 'Match the response',
+};
+
+// ════════════════════════════════════════════════
+//  INIT
+// ════════════════════════════════════════════════
+function init() {
+  if (typeof REVISION_DATA === 'undefined' || !REVISION_DATA.chapters || REVISION_DATA.chapters.length === 0) {
+    document.getElementById('chapters-grid').innerHTML =
+      '<div style="grid-column:1/-1;text-align:center;padding:30px;color:#f75454;font-size:14px;line-height:1.6;">' +
+      '⚠️ Could not load question data.<br><br>' +
+      'Make sure <b>revision-data.js</b> is in the <b>same folder</b> as this file, and that you are viewing this through a web server (e.g. GitHub Pages) rather than double-clicking the file directly — some browsers block local scripts when opened that way.' +
+      '</div>';
+    return;
+  }
+  buildChaptersGrid();
+}
+
+function buildChaptersGrid() {
+  const grid = document.getElementById('chapters-grid');
+  grid.innerHTML = '';
+  REVISION_DATA.chapters.forEach(ch => {
+    const card = document.createElement('div');
+    card.className = 'chapter-card';
+    card.style.borderTop = `3px solid ${ch.color}`;
+    card.innerHTML = `
+      <span class="ch-emoji">${ch.emoji}</span>
+      <div class="ch-num">Chapter ${ch.id}</div>
+      <div class="ch-title">${ch.title}</div>
+    `;
+    card.onclick = () => openChapter(ch.id);
+    grid.appendChild(card);
+  });
+}
+
+// ════════════════════════════════════════════════
+//  SCREEN NAVIGATION
+// ════════════════════════════════════════════════
+function showScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function goToGame() {
+  window.location.href = 'index.html';
+}
+
+// ════════════════════════════════════════════════
+//  CHAPTER DETAIL
+// ════════════════════════════════════════════════
+function openChapter(id) {
+  const ch = REVISION_DATA.chapters.find(c => c.id === id);
+  state.currentChapter = ch;
+  document.getElementById('chapter-top-title').textContent = `Ch ${ch.id} of 8`;
+  document.getElementById('chapter-emoji').textContent = ch.emoji;
+  document.getElementById('chapter-title').textContent = ch.title;
+  document.getElementById('chapter-subtitle').textContent = `${ch.questions.length} practice questions`;
+  showScreen('chapter');
+}
+
+// ════════════════════════════════════════════════
+//  SUMMARY
+// ════════════════════════════════════════════════
+function startSummary() {
+  const ch = state.currentChapter;
+  document.getElementById('summary-top-title').textContent = ch.title;
+  const s = ch.summary;
+  let html = '';
+
+  // Can-Do
+  html += `<div class="summary-section">
+    <div class="summary-section-header can-do">✅ Was kann ich?</div>
+    <div class="summary-section-body">
+      <ul class="can-do-list">${s.canDo.map(c=>`<li>${c}</li>`).join('')}</ul>
+    </div>
+  </div>`;
+
+  // Grammar
+  html += `<div class="summary-section">
+    <div class="summary-section-header grammar">📐 Grammatik</div>
+    <div class="summary-section-body">`;
+  s.grammar.forEach(g => {
+    html += `<div class="grammar-block">
+      <h4>${g.title}</h4>
+      <div class="explanation">${g.explanation}</div>
+      <div class="explanation-de">${g.explanation_de}</div>`;
+    if (g.table) {
+      html += `<table class="grammar-table"><thead><tr>${g.table.headers.map(h=>`<th>${h}</th>`).join('')}</tr></thead><tbody>`;
+      g.table.rows.forEach(row => {
+        html += `<tr>${row.map(cell=>`<td>${cell}</td>`).join('')}</tr>`;
+      });
+      html += `</tbody></table>`;
+    }
+    html += `<ul class="examples-list">${g.examples.map(e=>`<li><div class="de">${e.de}</div><div class="en">${e.en}</div></li>`).join('')}</ul>`;
+    html += `</div>`;
+  });
+  html += `</div></div>`;
+
+  // Vocab
+  html += `<div class="summary-section">
+    <div class="summary-section-header vocab">📖 Wichtige Wörter</div>
+    <div class="summary-section-body">`;
+  s.vocab.forEach(group => {
+    html += `<div class="vocab-group">
+      <h5>${group.group}</h5>
+      <div class="vocab-tags">${group.words.map(w=>`<span class="vocab-tag">${w}</span>`).join('')}</div>
+    </div>`;
+  });
+  html += `</div></div>`;
+
+  document.getElementById('summary-content').innerHTML = html;
+  showScreen('summary');
+}
+
+// ════════════════════════════════════════════════
+//  PRACTICE — single chapter
+// ════════════════════════════════════════════════
+function startPractice() {
+  const ch = state.currentChapter;
+  state.mode = 'practice';
+  state.isAll = false;
+  state.practicePool = shuffle([...ch.questions]);
+  state.practicePoolIndex = 0;
+  state.score = 0;
+  state.qIndex = 0;
+
+  setupQuizUI('practice', ch.title, '∞');
+  renderQuestion(state.practicePool[0], 0, state.practicePool.length, 'practice');
+  showScreen('quiz');
+}
+
+// ════════════════════════════════════════════════
+//  TEST — single chapter (10 questions)
+// ════════════════════════════════════════════════
+function startTest() {
+  const ch = state.currentChapter;
+  state.mode = 'test';
+  state.isAll = false;
+  const pool = shuffle([...ch.questions]).slice(0, 10);
+  state.questions = pool;
+  state.qIndex = 0;
+  state.score = 0;
+  state.testLog = [];
+
+  setupQuizUI('test', ch.title, pool.length);
+  renderQuestion(pool[0], 0, pool.length, 'test');
+  showScreen('quiz');
+}
+
+// ════════════════════════════════════════════════
+//  ALL — Test All (20 Q) / Practice All
+// ════════════════════════════════════════════════
+function startAllTest() {
+  state.mode = 'test';
+  state.isAll = true;
+  state.currentChapter = null;
+  let allQ = [];
+  REVISION_DATA.chapters.forEach(ch => allQ = allQ.concat(ch.questions));
+  const pool = shuffle(allQ).slice(0, 20);
+  state.questions = pool;
+  state.qIndex = 0;
+  state.score = 0;
+  state.testLog = [];
+
+  setupQuizUI('test', 'All Chapters', pool.length);
+  renderQuestion(pool[0], 0, pool.length, 'test');
+  showScreen('quiz');
+}
+
+function startAllPractice() {
+  state.mode = 'practice';
+  state.isAll = true;
+  state.currentChapter = null;
+  let allQ = [];
+  REVISION_DATA.chapters.forEach(ch => allQ = allQ.concat(ch.questions));
+  state.practicePool = shuffle(allQ);
+  state.practicePoolIndex = 0;
+  state.score = 0;
+  state.qIndex = 0;
+
+  setupQuizUI('practice', 'All Chapters', '∞');
+  renderQuestion(state.practicePool[0], 0, state.practicePool.length, 'practice');
+  showScreen('quiz');
+}
+
+// ════════════════════════════════════════════════
+//  QUIZ UI SETUP
+// ════════════════════════════════════════════════
+function setupQuizUI(mode, chapterLabel, total) {
+  document.getElementById('quiz-chapter-label').textContent = chapterLabel;
+  document.getElementById('quiz-top-title').textContent = mode === 'practice' ? 'Practice Mode' : 'Test Mode';
+  const badge = document.getElementById('quiz-mode-badge');
+  badge.textContent = mode === 'practice' ? 'Practice' : 'Test';
+  badge.className = 'quiz-mode-badge ' + mode;
+  const bar = document.getElementById('quiz-progress-bar');
+  bar.className = 'progress-bar ' + (mode === 'practice' ? 'green' : '');
+  bar.style.width = '0%';
+}
+
+// ════════════════════════════════════════════════
+//  RENDER QUESTION
+// ════════════════════════════════════════════════
+function renderQuestion(q, index, total, mode) {
+  state.answered = false;
+
+  // Counter
+  if (mode === 'practice') {
+    document.getElementById('quiz-counter').textContent = `Q ${index + 1}`;
+    document.getElementById('quiz-progress-bar').style.width = '0%';
+  } else {
+    document.getElementById('quiz-counter').textContent = `${index + 1} / ${total}`;
+    document.getElementById('quiz-progress-bar').style.width = `${((index) / total) * 100}%`;
+  }
+
+  document.getElementById('q-type-tag').textContent = TYPE_LABELS[q.type] || q.type;
+  document.getElementById('q-text').textContent = q.q;
+
+  // Options
+  const ol = document.getElementById('options-list');
+  ol.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'option-btn';
+    btn.textContent = `${letters[i]}. ${opt}`;
+    btn.onclick = () => handleAnswer(q, i, mode);
+    ol.appendChild(btn);
+  });
+
+  // Explanation & next
+  const exp = document.getElementById('explanation-box');
+  exp.className = 'explanation-box';
+  document.getElementById('exp-en').textContent = '';
+  document.getElementById('exp-de').textContent = '';
+  document.getElementById('next-btn').classList.remove('visible');
+}
+
+// ════════════════════════════════════════════════
+//  HANDLE ANSWER
+// ════════════════════════════════════════════════
+function handleAnswer(q, chosen, mode) {
+  if (state.answered) return;
+  state.answered = true;
+
+  const correct = (chosen === q.ans);
+  const btns = document.querySelectorAll('.option-btn');
+
+  // Colour all buttons
+  btns.forEach((btn, i) => {
+    btn.disabled = true;
+    if (i === q.ans) { btn.classList.add('correct'); }
+    else if (i === chosen && !correct) { btn.classList.add('wrong'); }
+  });
+
+  // Explanation — always shown (even on correct)
+  const expBox = document.getElementById('explanation-box');
+  expBox.className = 'explanation-box visible ' + (correct ? 'correct-exp' : 'wrong-exp');
+  document.getElementById('exp-en').textContent = (correct ? '✓ ' : '✗ ') + q.exp_en;
+  document.getElementById('exp-de').textContent = q.exp_de;
+
+  if (correct) state.score++;
+
+  // Test logging
+  if (mode === 'test') {
+    state.testLog.push({
+      q: q.q,
+      correctOpt: q.opts[q.ans],
+      yourOpt: q.opts[chosen],
+      correct,
+      exp_en: q.exp_en,
+    });
+  }
+
+  document.getElementById('next-btn').classList.add('visible');
+  const nextLabel = mode === 'practice' ? 'Next question →' : (state.qIndex + 1 >= state.questions.length ? 'Finish Test →' : 'Next →');
+  document.getElementById('next-btn').textContent = nextLabel;
+}
+
+// ════════════════════════════════════════════════
+//  NEXT QUESTION
+// ════════════════════════════════════════════════
+function nextQuestion() {
+  const mode = state.mode;
+
+  if (mode === 'practice') {
+    state.practicePoolIndex++;
+    state.qIndex++;
+    if (state.practicePoolIndex >= state.practicePool.length) {
+      // Reshuffle pool
+      state.practicePool = shuffle([...state.practicePool]);
+      state.practicePoolIndex = 0;
+    }
+    const q = state.practicePool[state.practicePoolIndex];
+    renderQuestion(q, state.qIndex, state.practicePool.length, 'practice');
+
+  } else {
+    state.qIndex++;
+    if (state.qIndex >= state.questions.length) {
+      showResults();
+    } else {
+      renderQuestion(state.questions[state.qIndex], state.qIndex, state.questions.length, 'test');
+    }
+  }
+}
+
+// ════════════════════════════════════════════════
+//  QUIT QUIZ
+// ════════════════════════════════════════════════
+function quitQuiz() {
+  if (state.isAll || !state.currentChapter) {
+    showScreen('home');
+  } else {
+    showScreen('chapter');
+  }
+}
+
+// ════════════════════════════════════════════════
+//  RESULTS
+// ════════════════════════════════════════════════
+function showResults() {
+  const total = state.questions.length;
+  const score = state.score;
+  const pct = Math.round((score / total) * 100);
+
+  let icon = '🎉', title = 'Excellent!';
+  if (pct < 50) { icon = '📚'; title = 'Keep practising!'; }
+  else if (pct < 70) { icon = '👍'; title = 'Good effort!'; }
+  else if (pct < 90) { icon = '⭐'; title = 'Great work!'; }
+
+  document.getElementById('result-icon').textContent = icon;
+  document.getElementById('result-title').textContent = title;
+  document.getElementById('result-score').textContent = `${score}/${total}`;
+  document.getElementById('result-sub').textContent = `${pct}% correct — review below`;
+
+  // Build review
+  const rl = document.getElementById('review-list');
+  rl.innerHTML = '';
+  state.testLog.forEach((item, i) => {
+    const div = document.createElement('div');
+    div.className = 'review-item ' + (item.correct ? 'all-good' : 'had-wrong');
+    let inner = `<div class="ri-q">Q${i+1}: ${item.q}</div>`;
+    inner += `<div class="ri-correct">✓ Correct: ${item.correctOpt}</div>`;
+    if (!item.correct) inner += `<div class="ri-your">✗ Your answer: ${item.yourOpt}</div>`;
+    inner += `<div class="ri-exp">${item.exp_en}</div>`;
+    div.innerHTML = inner;
+    rl.appendChild(div);
+  });
+
+  showScreen('results');
+}
+
+function retryTest() {
+  if (state.isAll) { startAllTest(); }
+  else { startTest(); }
+}
+
+// ════════════════════════════════════════════════
+//  UTILS
+// ════════════════════════════════════════════════
+function shuffle(arr) {
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+
+// ════════════════════════════════════════════════
+//  START
+// ════════════════════════════════════════════════
+init();
+</script>
+</body>
+</html>
